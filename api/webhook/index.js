@@ -1,4 +1,5 @@
 'use strict';
+require('dotenv').config();
 
 const line = require('@line/bot-sdk');
 const createHandler = require("azure-function-express").createHandler;
@@ -30,6 +31,32 @@ app.post('/api/webhook', line.middleware(config), (req, res) => {
 const client = new line.Client(config);
 
 async function handleEvent(event) {
+    switch (event.type) {
+        case 'message':
+            return client.replyMessage(event.replyToken, {
+                type: 'text',
+                text: event.message.text // オウム返し
+            });
+        case 'follow':
+            return client.replyMessage(event.replyToken, {
+                type: 'text',
+                text: 'はじめまして！'
+            });
+        case 'unfollow':
+            return Promise.resolve(null);
+        case 'join':
+            return Promise.resolve(null);
+        case 'leave':
+            return Promise.resolve(null);
+        case 'postback':
+            return client.replyMessage(event.replyToken, {
+                type: 'text',
+                text: 'ポストバック[]'
+            });
+        default:
+            throw new Error('Unknown event');
+    }
+    /*
     if (event.type !== 'message' || event.message.type !== 'text') {
         return Promise.resolve(null);
     }
@@ -38,6 +65,7 @@ async function handleEvent(event) {
         type: 'text',
         text: event.message.text // オウム返し
     });
+    */
 }
 
 module.exports = createHandler(app);
